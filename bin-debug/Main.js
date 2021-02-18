@@ -105,12 +105,8 @@ var Main = (function (_super) {
                     case 1:
                         _a.sent();
                         this.createGameScene();
-                        // const result = await RES.getResAsync("description_json")
-                        // this.startAnimation(result);
                         return [4 /*yield*/, platform.login()];
                     case 2:
-                        // const result = await RES.getResAsync("description_json")
-                        // this.startAnimation(result);
                         _a.sent();
                         return [4 /*yield*/, platform.getUserInfo()];
                     case 3:
@@ -169,6 +165,7 @@ var Main = (function (_super) {
      * Create scene interface
      */
     Main.prototype.createGameScene = function () {
+        var _this = this;
         /**
          * import all the resource
          */
@@ -178,52 +175,102 @@ var Main = (function (_super) {
         var dragonbonesFactory = new dragonBones.EgretFactory();
         dragonbonesFactory.parseDragonBonesData(dragonbonesData);
         dragonbonesFactory.parseTextureAtlasData(textureData, texture);
-        /**
-         * this name is retrieved from dragonbone 'armature' section
-         */
-        var armatureDisplayAttack1 = dragonbonesFactory.buildArmatureDisplay("Swordsman");
-        var armatureDisplayAttack1_1 = dragonbonesFactory.buildArmatureDisplay("Swordsman");
-        var armatureDisplayAttack2 = dragonbonesFactory.buildArmatureDisplay("Swordsman");
-        var armatureDisplayJump = dragonbonesFactory.buildArmatureDisplay("Swordsman");
-        var armatureDisplaySteady = dragonbonesFactory.buildArmatureDisplay("Swordsman");
-        var armatureDisplaySteady2 = dragonbonesFactory.buildArmatureDisplay("Swordsman");
-        var armatureDisplayWalk = dragonbonesFactory.buildArmatureDisplay("Swordsman");
-        var armatureDisplayWalk2 = dragonbonesFactory.buildArmatureDisplay("Swordsman");
-        this.addChild(armatureDisplayAttack1);
-        this.addChild(armatureDisplayAttack1_1);
-        this.addChild(armatureDisplayAttack2);
-        this.addChild(armatureDisplayJump);
-        this.addChild(armatureDisplaySteady);
-        this.addChild(armatureDisplaySteady2);
-        this.addChild(armatureDisplayWalk);
-        this.addChild(armatureDisplayWalk2);
-        armatureDisplayAttack1.x = this.stage.stageWidth * 0.2;
-        armatureDisplayAttack1.y = this.stage.stageHeight * 0.25;
-        armatureDisplayAttack1_1.x = this.stage.stageWidth * 0.4;
-        armatureDisplayAttack1_1.y = this.stage.stageHeight * 0.25;
-        armatureDisplayAttack2.x = this.stage.stageWidth * 0.6;
-        armatureDisplayAttack2.y = this.stage.stageHeight * 0.25;
-        armatureDisplayJump.x = this.stage.stageWidth * 0.8;
-        armatureDisplayJump.y = this.stage.stageHeight * 0.25;
-        armatureDisplaySteady.x = this.stage.stageWidth * 0.2;
-        armatureDisplaySteady.y = this.stage.stageHeight * 0.75;
-        armatureDisplaySteady2.x = this.stage.stageWidth * 0.4;
-        armatureDisplaySteady2.y = this.stage.stageHeight * 0.75;
-        armatureDisplayWalk.x = this.stage.stageWidth * 0.6;
-        armatureDisplayWalk.y = this.stage.stageHeight * 0.75;
-        armatureDisplayWalk2.x = this.stage.stageWidth * 0.8;
-        armatureDisplayWalk2.y = this.stage.stageHeight * 0.75;
-        /**
-         * these name are retrieved from dragonbone 'animation' section
-         */
-        armatureDisplayAttack1.animation.play("attack1");
-        armatureDisplayAttack1_1.animation.play("attack1_+1");
-        armatureDisplayAttack2.animation.play("attack2");
-        armatureDisplayJump.animation.play("jump");
-        armatureDisplaySteady.animation.play("steady");
-        armatureDisplaySteady2.animation.play("steady2");
-        armatureDisplayWalk.animation.play("walk");
-        armatureDisplayWalk2.animation.play("walk2");
+        var armatureDisplay = dragonbonesFactory.buildArmatureDisplay("Swordsman");
+        this.addChild(armatureDisplay);
+        armatureDisplay.x = this.stage.stageWidth / 2;
+        armatureDisplay.y = this.stage.stageHeight / 2;
+        armatureDisplay.animation.play("steady");
+        var action = function (e) {
+            /**
+             * to remove the keyboard listener to that the animation will no interupt whenever other button is clicked
+             */
+            document.removeEventListener("keydown", action);
+            switch (e.code) {
+                case 'KeyQ':
+                    armatureDisplay.animation.play("attack1", 1);
+                    /**
+                     * to run the loop_finish function after the animation is done
+                     */
+                    armatureDisplay.addEventListener(dragonBones.EventObject.LOOP_COMPLETE, loop_finish, _this);
+                    break;
+                case 'KeyW':
+                    armatureDisplay.animation.play("attack1_+1", 1);
+                    /**
+                     * to run the loop_finish function after the animation is done
+                     */
+                    armatureDisplay.addEventListener(dragonBones.EventObject.LOOP_COMPLETE, loop_finish, _this);
+                    break;
+                case 'KeyE':
+                    armatureDisplay.animation.play("attack2", 1);
+                    /**
+                     * to run the loop_finish function after the animation is done
+                     */
+                    armatureDisplay.addEventListener(dragonBones.EventObject.LOOP_COMPLETE, loop_finish, _this);
+                    break;
+                case 'KeyF':
+                    if (armatureDisplay.animation.lastAnimationName === 'steady2' || armatureDisplay.animation.lastAnimationName === 'walk2') {
+                        armatureDisplay.animation.play("steady");
+                    }
+                    else {
+                        armatureDisplay.animation.play("steady2");
+                    }
+                    /**
+                     * keyboard listener is added back, cannot be added outside of the switch case as it will immediately add back the listener
+                     */
+                    document.addEventListener("keydown", action);
+                    break;
+                case 'Space':
+                    armatureDisplay.animation.play("jump", 1);
+                    /**
+                     * to run the loop_finish function after the animation is done
+                     */
+                    armatureDisplay.addEventListener(dragonBones.EventObject.LOOP_COMPLETE, loop_finish, _this);
+                    break;
+                case 'ArrowRight':
+                    if (armatureDisplay.animation.lastAnimationName === 'steady2') {
+                        armatureDisplay.animation.play("walk2");
+                    }
+                    else {
+                        armatureDisplay.animation.play("walk");
+                    }
+                    /**
+                     * keyboard listener is added back, cannot be added outside of the switch case as it will immediately add back the listener
+                     */
+                    document.addEventListener("keydown", action);
+                    break;
+                case 'ArrowLeft':
+                    if (armatureDisplay.animation.lastAnimationName === 'steady2') {
+                        armatureDisplay.animation.play("walk2");
+                    }
+                    else {
+                        armatureDisplay.animation.play("walk");
+                    }
+                    /**
+                     * keyboard listener is added back, cannot be added outside of the switch case as it will immediately add back the listener
+                     */
+                    document.addEventListener("keydown", action);
+                    break;
+                default:
+                    /**
+                     * listener is added back, cannot be added outside of the switch case as it will immediately add back the listener
+                     */
+                    document.addEventListener("keydown", action);
+                    armatureDisplay.animation.play("steady");
+            }
+            ;
+        };
+        document.addEventListener("keydown", action);
+        function loop_finish() {
+            armatureDisplay.animation.play("steady");
+            /**
+             * after the animation is done, the keyboard listener is added back again
+             */
+            document.addEventListener("keydown", action);
+            /**
+             * if the above action is run first, the listener effect will stay unless removed.
+             */
+            armatureDisplay.removeEventListener(dragonBones.EventObject.LOOP_COMPLETE, loop_finish, this);
+        }
     };
     return Main;
 }(eui.UILayer));
